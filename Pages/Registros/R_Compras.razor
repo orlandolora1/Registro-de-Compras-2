@@ -1,0 +1,158 @@
+﻿@page "/Compra"
+
+@inject ComprasBLL comprasBLL
+@inject ProductosBLL productosBLL
+
+<EditForm Model="compra" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="card text-dark bg-light mb-3 shadow-lg">
+
+        <div class="card-header">Registro de Compras</div>
+
+        <div class="card-body">
+            <div class="row justify-content-between">
+
+                @*Compra Id*@
+                <div class="col-3">
+                    <label>Compra Id</label>
+                    <div class="input-group mb-3">
+                        <InputNumber class="form-control" @bind-Value="compra.CompraId" />
+                        <button class="btn btn-outline-primary" type="button"> <i class="oi oi-magnifying-glass" /> </button>
+                    </div>
+                </div>
+
+                @*Fecha*@
+                <div class="col-3">
+                    <label>Fecha</label>
+                    <InputDate class="form-control" @bind-Value="compra.Fecha" />
+                </div>
+            </div>
+
+
+
+
+            @* COMPRA DETALLE *@
+            <fieldset class="border-success">
+                <div class="row">
+                    @* Producto Id *@
+                    <div class="col-2">
+                        <label>Producto</label>
+                        <InputSelect class="form-select" @bind-Value="Detalle.ProductoId">
+                            @foreach (var producto in ProductList)
+                            {
+                                <option value="@producto.ProductoId"> @producto.Descripcion</option>
+                            }
+
+                        </InputSelect>
+
+                    </div>
+
+
+                    @* Cantidad *@
+                    <div class="col-2">
+                        <label>Cantidad</label>
+                        <InputNumber class="form-control" @bind-Value="Detalle.Cantidad" />
+
+                    </div>
+
+
+                    <div class="col-2">
+                        <button type="button" class="btn btn-success col" @onclick="AgregarDetalle">
+                            <span class="oi oi-plus">Agregar</span>
+                        </button>
+
+                    </div>
+                </div>
+            </fieldset>
+
+
+            @* Tabla de detalles *@
+            <hr />
+            <table class="table table-bordered table-light">
+                <thead class="thead">
+                    <tr class="table">
+                        <th>ProductoId</th>
+                        <th>Descripción</th>
+                        <th>Costo</th>
+                        <th>Cantidad</th>
+                        <th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in compra.Detalle)
+                    {
+                        <tr>
+                            <td>@item.ProductoId</td>
+                            <td>@item.Descripcion</td>
+                            <td>@item.Costo</td>
+                            <td>@item.Cantidad</td>
+                            <td>RD$@item.Importe</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <hr />
+
+
+
+
+
+
+            @*Total*@
+            <div class="row  d-flex justify-content-end">
+                <div class="col-3">
+                    <label>Total</label>
+                    <span class="form-control"> @compra.Total.ToString("N2") </span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card-footer d-flex justify-content-center">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary"> <i class="oi oi-file" /> Nuevo</button>
+                <button type="submit" class="btn btn-success"> <i class="oi oi-document" /> Guardar</button>
+                <button type="button" class="btn btn-danger"><i class="oi oi-trash" /> Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+</EditForm>
+
+@code {
+    public Compras compra { get; set; } = new Compras();
+    public List<Productos> ProductList { get; set; }
+
+    public ComprasDetalle Detalle { get; set; } = new ComprasDetalle();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ProductList = productosBLL.GetList();
+
+        compra.CompraId = 0;
+        compra.Fecha = DateTime.Now;
+
+        compra.Total = 100;
+    }
+
+    public void AgregarDetalle()
+    {
+        var producto = productosBLL.Buscar(Detalle.ProductoId);
+
+        Detalle.Descripcion = producto.Descripcion;
+        Detalle.Costo = producto.Costo;
+
+        compra.Detalle.Add(Detalle);
+
+        compra.Total = compra.Detalle.Sum(det => det.Importe);
+    }
+
+    void Guardar()
+    {
+        compra.CompraId = 0;
+        comprasBLL.Guardar(this.compra);
+    }
+}

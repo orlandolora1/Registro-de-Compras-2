@@ -1,0 +1,53 @@
+﻿@page "/Compras"
+@inject ComprasBLL comprasBLL
+
+<EditForm Model="this">
+
+    <div class="card" style="box-shadow: 8px 8px rgba(0, 0, 0, 0.26);">
+
+        <div class="card-header">
+            <h4 style="text-align: center;">Consulta de compra</h4>
+        </div>
+
+        <div class="card-body">
+            <button @onclick="Buscar"
+                    class="btn btn-primary">
+                <i class="oi oi-magnifying-glass" /> Buscar
+            </button>
+
+        </div>
+    </div>
+
+    <table class="table table-light" style="box-shadow: 1px 6px rgba(0, 0, 0, 0.2);">
+        <thead class="thead">
+            <tr class="table">
+                <th>CompraId</th>
+                <th>Fecha</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var compra in comprasList)
+            {
+                <tr>
+                    <td>@compra.CompraId</td>
+                    <td>@compra.Fecha</td>
+                    <td>@compra.Total </td>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</EditForm>
+
+@code {
+    public List<Compras> comprasList { get; set; } = new List<Compras>();
+
+    void Buscar()
+    {
+        comprasList = comprasBLL.GetList();
+    }
+}
